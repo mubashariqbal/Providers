@@ -2,9 +2,9 @@
 
 namespace SocialiteProviders\Coinbase;
 
+use SocialiteProviders\Manager\OAuth2\User;
 use Laravel\Socialite\Two\ProviderInterface;
 use SocialiteProviders\Manager\OAuth2\AbstractProvider;
-use SocialiteProviders\Manager\OAuth2\User;
 
 class Provider extends AbstractProvider implements ProviderInterface
 {
@@ -37,9 +37,10 @@ class Provider extends AbstractProvider implements ProviderInterface
     protected function getUserByToken($token)
     {
         $response = $this->getHttpClient()->get(
-            'https://api.coinbase.com/v1/users/self', [
+            'https://api.coinbase.com/v2/user', [
             'headers' => [
                 'Authorization' => 'Bearer '.$token,
+                'CB-VERSION' => '2017-10-31',
             ],
         ]);
 
@@ -51,9 +52,10 @@ class Provider extends AbstractProvider implements ProviderInterface
      */
     protected function mapUserToObject(array $user)
     {
+        // dd($user);
         return (new User())->setRaw($user)->map([
-            'id'   => $user['user']['id'], 'nickname' => $user['user']['username'],
-            'name' => null, 'email' => $user['user']['email'], 'avatar' => null,
+            'id' => $user['data']['id'], 'nickname' => $user['data']['username'],
+            'name' => $user['data']['name'], 'email' => null, 'avatar' => $user['data']['avatar_url'],
         ]);
     }
 
